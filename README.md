@@ -49,7 +49,7 @@ A simple **Contact Book Application** built with Python. This program allows use
 7. Update Contact
 8. Exit
 
-**Examples**
+<details> <summary><strong>Examples (Click to Expand)</strong></summary>
 
 1. **Add a contact:**
 
@@ -80,3 +80,4 @@ A simple **Contact Book Application** built with Python. This program allows use
     
     Enter the name of the contact to delete: Alice
     Contact 'Alice' deleted.
+</details>
