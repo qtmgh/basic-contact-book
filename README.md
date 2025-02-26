@@ -1,6 +1,6 @@
 # Contact Book Application
 
-![Python](https://img.shields.io/badge/Python-3.x-blue) ![GitHub](https://img.shields.io/github/license/qtmgh/contact-book)
+![Python](https://img.shields.io/badge/Python-3.x-blue) ![GitHub](https://img.shields.io/github/license/qtmgh/basic-contact-book)
 
 A simple **Contact Book Application** built with Python. This program allows users to manage their contacts by adding, viewing, searching, updating, and deleting contacts. Contacts can also be saved to and loaded from a file.
 
