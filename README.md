@@ -37,7 +37,7 @@ A simple **Contact Book Application** built with Python. This program allows use
 
 ### **Usage**
 
-**Main Menu**
+<details> <summary><strong>Main Menu (Click to Expand)</strong></summary>
 
 === Contact Book ===
 1. Add Contact
