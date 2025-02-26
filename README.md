@@ -48,6 +48,7 @@ A simple **Contact Book Application** built with Python. This program allows use
 6. Delete Contact
 7. Update Contact
 8. Exit
+</details>
 
 <details> <summary><strong>Examples (Click to Expand)</strong></summary>
 
