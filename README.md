@@ -37,7 +37,7 @@ A simple **Contact Book Application** built with Python. This program allows use
 
 ### **Usage**
 
-*Main Menu*
+**Main Menu**
 
 === Contact Book ===
 1. Add Contact
@@ -49,7 +49,7 @@ A simple **Contact Book Application** built with Python. This program allows use
 7. Update Contact
 8. Exit
 
-*Examples*
+**Examples**
 
 1. **Add a contact:**
 
