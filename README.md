@@ -37,7 +37,7 @@ A simple **Contact Book Application** built with Python. This program allows use
 
 ### **Usage**
 
-* Main Menu *
+*Main Menu*
 
 === Contact Book ===
 1. Add Contact
@@ -51,30 +51,32 @@ A simple **Contact Book Application** built with Python. This program allows use
 
 *Examples*
 
-1. *Add a contact:*
+1. **Add a contact:**
+
     Enter name: Alice
     Enter phone (10 digits): 1234567890
     Enter email: alice@example.com
     Contact added!
-2. *View Contacts:*
+
+2. **View Contacts:**
+    
     Contacts:
     1. Name: Alice, Phone: 1234567890, Email: alice@example.com
-3. *Search for a Contact:*
+
+3. **Search for a Contact:**
+   
     Enter name to search: Alice
     Name: Alice, Phone: 1234567890, Email: alice@example.com
-4. *Update a Contact:*
+    
+4. **Update a Contact:**
+    
     Enter the name of the contact to update: Alice
     Current details: Phone: 1234567890, Email: alice@example.com
     Enter new phone (10 digits): 0987654321
     Enter new email: alice.new@example.com
     Contact updated.
-5. *Delete a Contact:*
+
+5. **Delete a Contact:**
+    
     Enter the name of the contact to delete: Alice
     Contact 'Alice' deleted.
-
-### **File Structure** 
-contact-book/
-├── contact_book.py       # Main Python script
-├── contacts.txt          # Default file to store contacts (text format)
-├── contacts.json         # Optional file to store contacts (JSON format)
-├── README.md             # Project documentation
