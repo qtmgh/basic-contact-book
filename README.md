@@ -61,17 +61,23 @@ A simple **Contact Book Application** built with Python. This program allows use
 2. **View Contacts:**
     
     Contacts:
-    1. Name: Alice, Phone: 1234567890, Email: alice@example.com
+    1. Name: Alice 
+    Phone: 1234567890 
+    Email: alice@example.com
 
 3. **Search for a Contact:**
    
     Enter name to search: Alice
-    Name: Alice, Phone: 1234567890, Email: alice@example.com
+    Name: Alice 
+    Phone: 1234567890
+    Email: alice@example.com
     
 4. **Update a Contact:**
     
     Enter the name of the contact to update: Alice
-    Current details: Phone: 1234567890, Email: alice@example.com
+    Current details: 
+    Phone: 1234567890
+    Email: alice@example.com
     Enter new phone (10 digits): 0987654321
     Enter new email: alice.new@example.com
     Contact updated.
