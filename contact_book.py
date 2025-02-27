@@ -1,4 +1,5 @@
 import json
+import csv
 
 contacts = [] 
 
@@ -49,6 +50,27 @@ def load_contacts():
         print("Contacts loaded from file.")
     except FileNotFoundError:
         print("No contacts file found.")
+    except json.JSONDecodeError:
+        print("Error: File is corrupted or not in JSON format.")
+
+def export_contacts(): 
+    with open("contacts.csv", "w", newline="") as file:
+        writer = csv.writer(file)
+        writer.writerow(["Name", "Phone", "Email"])
+        for contact in contacts:
+            writer.writerow([contact["name"], contact["phone"], contact["email"]])
+    print("Contacts exported to CSV file.")
+
+def import_contacts():
+    try:
+        with open("contacts.csv", "r") as file:
+            reader = csv.reader(file)
+            next(reader) # Skip header row
+            for row in reader:
+                contacts.append({"name": row[0], "phone": row[1], "email": row[2]})
+        print("Contacts imported from CSV.")
+    except FileNotFoundError:
+        print("No CSV file found.")
 
 def delete_contact():
     name = input("Enter the name of the contact to delete: ")
@@ -90,9 +112,11 @@ def main():
         print("3. Search Contact")
         print("4. Save Contacts")
         print("5. Load Contacts")
-        print("6. Delete Contact")
-        print("7. Update Contact")
-        print("8. Exit")
+        print("6. Export Contacts")
+        print("7. Import Contacts")
+        print("8. Delete Contact")
+        print("9. Update Contact")
+        print("10. Exit")
         choice = input("Enter your choice: ")
 
         if choice == "1":
@@ -106,10 +130,14 @@ def main():
         elif choice == "5":
             load_contacts()
         elif choice == "6":
-            delete_contact()
-        elif choice == "7":
-            update_contact()
+            export_contacts()
+        elif choice == "7": 
+            import_contacts()
         elif choice == "8":
+            delete_contact()
+        elif choice == "9":
+            update_contact()
+        elif choice == "10":
             print("Exiting...")
             break
         else:
