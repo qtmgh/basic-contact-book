@@ -1,41 +1,62 @@
 import json
 import csv
 
-contacts = [] 
+contacts = {
+    "Family": [], 
+    "Friends": [],
+    "Work": []
+} 
 
-def add_contact(): 
+def add_contact():
+    group = input("Enter group (Family, Friends, Work): ")
+    if group not in contacts:
+        print("Invalid group.")
+        return
+    
     name = input("Enter name: ")
+
     while True:
         phone = input("Enter phone (10 digits): ")
         if phone.isdigit() and len(phone) == 10:
             break
         print("Invalid phone number. Please enter 10 digits.")
+        
     while True:
         email = input("Enter email: ")
         if "@" in email:
             break
         print("Invalid email. Please include '@'.")
-    contact = {"name": name, "phone": phone, "email": email}
-    contacts.append(contact)
+        
+    contacts[group].append({"name": name, "phone": phone, "email": email})
     print("Contact added!")
 
 def view_contacts():
-    if not contacts:
+    found = False  # To track if we have any contacts
+
+    print("Contacts:")
+    for group, contact_list in contacts.items():  # Iterate over each group and its list
+        if contact_list:  # Only print if the group has contacts
+            print(f"\n{group} Contacts:")
+            for i, contact in enumerate(contact_list, start=1):
+                print(f"{i}. Name: {contact['name']}, Phone: {contact['phone']}, Email: {contact['email']}")
+                found = True
+    
+    if not found:
         print("No contacts found.")
-    else:
-        print ("Contacts:")
-        for i, contact in enumerate(contacts, start = 1):
-            print(f"{i}. Name: {contact['name']}, Phone: {contact['phone']}, Email: {contact['email']}")
+
+
 
 def search_contact():
     name = input("Enter name to search: ")
     found = False
-    for contact in contacts:
-        if contact["name"].lower() == name.lower():
-            print(f"name: {contact['name']}, Phone: {contact['phone']}, Email: {contact['email']}")
-            found = True
+    for group, contact_list, in contacts.items(): # Iterate through groups
+        for contact in contact_list: # Iterate through contacts in each group
+            if contact["name"].lower() == name.lower():
+                print(f"\nGroup: {group}")
+                print(f"name: {contact['name']}, Phone: {contact['phone']}, Email: {contact['email']}")
+                found = True
     if not found:
-            print("Contact not found.")
+        print("Contact not found.")
 
 def save_contacts(): 
     with open("contacts.json", "w") as file: 
@@ -56,9 +77,13 @@ def load_contacts():
 def export_contacts(): 
     with open("contacts.csv", "w", newline="") as file:
         writer = csv.writer(file)
-        writer.writerow(["Name", "Phone", "Email"])
-        for contact in contacts:
-            writer.writerow([contact["name"], contact["phone"], contact["email"]])
+        # Header Row
+        writer.writerow(["Group","Name", "Phone", "Email"])
+        # Iterate through groups and contacts
+        for group, contact_list in contacts.items(): 
+            for contact in contact_list:  
+                # Write a row for each contact, including group
+                writer.writerow([group, contact["name"], contact["phone"], contact["email"]])
     print("Contacts exported to CSV file.")
 
 def import_contacts():
@@ -67,7 +92,7 @@ def import_contacts():
             reader = csv.reader(file)
             next(reader) # Skip header row
             for row in reader:
-                contacts.append({"name": row[0], "phone": row[1], "email": row[2]})
+                contacts.append({"group": row[0], "name": row[1], "phone": row[2], "email": row[3]})
         print("Contacts imported from CSV.")
     except FileNotFoundError:
         print("No CSV file found.")
