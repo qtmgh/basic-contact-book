@@ -92,21 +92,46 @@ def search_contact():
     # Close the connection
     conn.close()
 
-def save_contacts(): 
-    with open("contacts.json", "w") as file: 
-        json.dump(contacts,file)
-    print("Contacts saved to file.")
+def save_contacts():
+    conn = sqlite3.connect("contacts.db")
+    cursor = conn.cursor()
+    
+    # Fetch all contacts from the database
+    cursor.execute("SELECT contact_group, name, phone, email FROM contacts")
+    rows = cursor.fetchall()
+    
+    # Write contacts to a CSV file
+    with open("contacts.csv", "w", newline="") as file:
+        writer = csv.writer(file)
+        writer.writerow(["Group", "Name", "Phone", "Email"])  # Write header
+        writer.writerows(rows)  # Write rows
+    
+    # Close the database connection
+    conn.close()
+    print("Contacts exported to CSV.")
 
-def load_contacts(): 
+def load_contacts():
     try:
-        with open("contacts.json", "r") as file:
-            global contacts
-            contacts = json.load(file)
-        print("Contacts loaded from file.")
+        with open("contacts.csv", "r") as file:
+            reader = csv.reader(file)
+            next(reader)  # Skip header row
+            conn = sqlite3.connect("contacts.db")
+            cursor = conn.cursor()
+            
+            for row in reader:
+                group, name, phone, email = row
+                # Insert each contact into the database
+                cursor.execute("""
+                    INSERT INTO contacts (contact_group, name, phone, email)
+                    VALUES (?, ?, ?, ?)
+                """, (group, name, phone, email))
+            
+            # Commit changes and close the connection
+            conn.commit()
+            conn.close()
+            print("Contacts imported from CSV.")
     except FileNotFoundError:
-        print("No contacts file found.")
-    except json.JSONDecodeError:
-        print("Error: File is corrupted or not in JSON format.")
+        print("No CSV file found.")
 
 def export_contacts(): 
     conn = sqlite3.connect("contacts.db")
@@ -126,6 +151,7 @@ def export_contacts():
     conn.close()
     print("Contacts exported to CSV")
 
+
 def import_contacts():
     try:
         with open("contacts.csv", "r") as file:
@@ -133,20 +159,33 @@ def import_contacts():
             next(reader)  # Skip header row
             conn = sqlite3.connect("contacts.db")
             cursor = conn.cursor()
-            
+
             for row in reader:
                 group, name, phone, email = row
+
+                # Check if contact already exists
                 cursor.execute("""
-                    INSERT INTO contacts (contact_group, name, phone, email)
-                    VALUES (?, ?, ?, ?)
-                """, (group, name, phone, email))
-            
+                    SELECT COUNT(*) FROM contacts 
+                    WHERE name = ? AND phone = ?
+                """, (name, phone))
+                exists = cursor.fetchone()[0]
+
+                if exists == 0:  # If contact does not exist, insert it
+                    cursor.execute("""
+                        INSERT INTO contacts (contact_group, name, phone, email)
+                        VALUES (?, ?, ?, ?)
+                    """, (group, name, phone, email))
+                else:
+                    print(f"Skipping duplicate contact: {name} ({phone})")
+
             # Commit changes and close the connection
             conn.commit()
             conn.close()
             print("Contacts imported from CSV.")
+    
     except FileNotFoundError:
         print("No CSV file found.")
+
 
 def delete_contact():
     name = input("Enter the name of the contact to delete: ")
