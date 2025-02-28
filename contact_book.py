@@ -34,7 +34,7 @@ def search_contact():
         if contact["name"].lower() == name.lower():
             print(f"name: {contact['name']}, Phone: {contact['phone']}, Email: {contact['email']}")
             found = True
-        if not found:
+    if not found:
             print("Contact not found.")
 
 def save_contacts(): 
