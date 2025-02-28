@@ -13,7 +13,11 @@ A simple **Contact Book Application** built with Python. This program allows use
 - **Update Contact**: Update the phone number or email of an existing contact.
 - **Delete Contact**: Remove a contact from the contact book.
 - **Save Contacts**: Save all contacts to a file (`contacts.txt` or `contacts.json`).
-- **Load Contacts**: Load contacts from a file.
+- **Load Contacts**: Load contacts from a file (`contacts.txt` or `contacts.json`).
+- **Export Contacts**: Exports contacts to a CSV file.
+- **Import Contacts**: Imports contacts from a CSV file.
+- **Delete Contact**: Delete a contact.
+- **Update Contact**: Update a contact.
 
 ---
 
