@@ -1,11 +1,31 @@
 import json
 import csv
+import sqlite3
 
 contacts = {
     "Family": [], 
     "Friends": [],
     "Work": []
 } 
+
+def initialize_db(): 
+    # Connect to the database (creates one if it doesn't exist)
+    conn = sqlite3.connect('contacts.db')
+    cursor = conn.cursor()
+
+    # Create the contacts table
+    cursor.execute("""CREATE TABLE IF NOT EXISTS contacts (
+                   id INTEGER PRIMARY KEY AUTOINCREMENT,
+                   contact_group TEXT NOT NULL,
+                   name TEXT NOT NULL,
+                   phone TEXT NOT NULL,
+                   email TEXT NOT NULL)
+                   """)
+    # Commit changes and close connection
+    conn.commit()
+    conn.close()
+# Call this function once to initalize database
+initialize_db()
 
 def add_contact():
     group = input("Enter group (Family, Friends, Work): ")
@@ -27,36 +47,50 @@ def add_contact():
             break
         print("Invalid email. Please include '@'.")
         
-    contacts[group].append({"name": name, "phone": phone, "email": email})
+    conn = sqlite3.connect("contacts.db")
+    cursor = conn.cursor()
+    cursor.execute("""INSERT INTO contacts (contact_group, name, phone, email) 
+                   VALUES (?, ?, ?, ?)""", (group, name, phone, email))
+    conn.commit()
+    conn.close()
     print("Contact added!")
 
 def view_contacts():
-    found = False  # To track if we have any contacts
+    conn = sqlite3.connect("contacts.db")
+    cursor = conn.cursor()
 
-    print("Contacts:")
-    for group, contact_list in contacts.items():  # Iterate over each group and its list
-        if contact_list:  # Only print if the group has contacts
-            print(f"\n{group} Contacts:")
-            for i, contact in enumerate(contact_list, start=1):
-                print(f"{i}. Name: {contact['name']}, Phone: {contact['phone']}, Email: {contact['email']}")
-                found = True
-    
-    if not found:
+    cursor.execute("SELECT contact_group, name, phone, email FROM contacts")
+    rows = cursor.fetchall()
+
+    if not rows:
         print("No contacts found.")
-
-
+    else:
+        print("Contacts: ")
+        for row in rows:
+            group, name, phone, email = row
+            print(f"Group: {group}, Name: {name}, Phone: {phone}, Email: {email}")
+    # Close the connection
+    conn.close()
 
 def search_contact():
     name = input("Enter name to search: ")
-    found = False
-    for group, contact_list, in contacts.items(): # Iterate through groups
-        for contact in contact_list: # Iterate through contacts in each group
-            if contact["name"].lower() == name.lower():
-                print(f"\nGroup: {group}")
-                print(f"name: {contact['name']}, Phone: {contact['phone']}, Email: {contact['email']}")
-                found = True
-    if not found:
-        print("Contact not found.")
+    conn = sqlite3.connect("contacts.db")
+    cursor = conn.cursor()
+
+    # Search for contacts by name
+    cursor.execute(""" SELECT contact_group, name, phone, email FROM contacts
+                   WHERE name LIKE ?
+                   """, (f"%{name}%",))
+    rows = cursor.fetchall()
+    if not rows:
+        print("No contacts found.")
+    else:
+        print("Matching contacts: ")
+        for row in rows:
+            group, name, phone, email = row
+            print(f"Group: {group}, Name: {name}, Phone: {phone}, Email: {email}")
+    # Close the connection
+    conn.close()
 
 def save_contacts(): 
     with open("contacts.json", "w") as file: 
@@ -75,89 +109,101 @@ def load_contacts():
         print("Error: File is corrupted or not in JSON format.")
 
 def export_contacts(): 
+    conn = sqlite3.connect("contacts.db")
+    cursor = conn.cursor()
+
+    # Fetch all contacts
+    cursor.execute("SELECT contact_group, name, phone, email FROM contacts")
+    rows = cursor.fetchall()
+
+    # Write to CSV
     with open("contacts.csv", "w", newline="") as file:
         writer = csv.writer(file)
-        # Header Row
-        writer.writerow(["Group","Name", "Phone", "Email"])
-        # Iterate through groups and contacts
-        for group, contact_list in contacts.items(): 
-            for contact in contact_list:  
-                # Write a row for each contact, including group
-                writer.writerow([group, contact["name"], contact["phone"], contact["email"]])
-    print("Contacts exported to CSV file.")
+        writer.writerow(["Group", "Name", "Phone", "Email"]) # Write header
+        writer.writerows(rows) # Write rows
+    
+    # Close the connection
+    conn.close()
+    print("Contacts exported to CSV")
 
 def import_contacts():
     try:
         with open("contacts.csv", "r") as file:
             reader = csv.reader(file)
-            next(reader) # Skip header row
+            next(reader)  # Skip header row
+            conn = sqlite3.connect("contacts.db")
+            cursor = conn.cursor()
+            
             for row in reader:
                 group, name, phone, email = row
-                # Check if group exists
-                if group not in contacts:
-                    contacts[group] = []
-
-                # Check if contact already exists
-                if any(contact["name"] == name and contact["phone"] == phone and contact["email"] == email for contact in contacts[group]):
-                    print(f"Duplicate contact found: {name} ({phone}, {email}) - Skipping.")
-                    continue  # Skip adding duplicate
-
-                
-                contacts[group].append({"group": row[0], "name": row[1], "phone": row[2], "email": row[3]})
-        print("Contacts imported from CSV.")
-    
+                cursor.execute("""
+                    INSERT INTO contacts (contact_group, name, phone, email)
+                    VALUES (?, ?, ?, ?)
+                """, (group, name, phone, email))
+            
+            # Commit changes and close the connection
+            conn.commit()
+            conn.close()
+            print("Contacts imported from CSV.")
     except FileNotFoundError:
         print("No CSV file found.")
 
 def delete_contact():
-    group = input("Enter the group (Family, Friends, Work): ")
-    if group not in contacts:
-        print("Group not found.")
-        return
-
     name = input("Enter the name of the contact to delete: ")
-    
-    for contact in contacts[group]:
-        if contact["name"].lower() == name.lower():
-            contacts[group].remove(contact)
-            print(f"Contact '{name}' has been deleted from {group}.")
-            return
-        
+    conn = sqlite3.connect("contacts.db")
+    cursor = conn.cursor()
 
-    print("Contact not found.")
+    # Delete contact using name
+    cursor.execute("DELETE FROM contacts WHERE name = ?", (name,))
+
+    # Check affected rows (if any)
+    if cursor.rowcount > 0:
+        print(f"Contact '{name}' deleted successfully.")
+    else: 
+        print("Contact not found.")
+
+    # Commit changes and close connection
+    conn.commit()
+    conn.close()
 
 def update_contact():
-    group = input("Enter the group (Family, Friends, Work): ")
-    if group not in contacts:
-        print("Group not found.")
-        return
-
     name = input("Enter the name of the contact to update: ")
+    conn = sqlite3.connect("contacts.db")
+    cursor = conn.cursor()
 
-    for contact in contacts[group]:
-        if contact["name"].lower() == name.lower():
-            print(f"Current details: Phone: {contact['phone']}, Email: {contact['email']}")
-           
-            # Validate phone number
-            while True:
-                phone = input("Enter new phone (10 digits): ")
-                if phone.isdigit() and len(phone) == 10:
-                    contact["phone"] = phone
-                    break
-                print("Invalid phone number. Please enter 10 digits")
-            
-            # Validate email
-            while True:
-                email = input("Enter new email: ")
-                if "@" in email:
-                    contact["email"] = email
-                    break
-                print("Invalid email. Please include '@'.")
+    # Fetch current contact details
+    cursor.execute("SELECT contact_group, name, phone, email FROM contacts WHERE name = ?", (name,))
+    row = cursor.fetchone()
 
-            print(f"Contact '{name}' in {group} has been updated.")
-            return
-        
-    print("Contact not found.")
+    if not row: 
+        print("Contact not found.")
+        conn.close()
+        return
+    
+    group, name, phone, email = row
+    print(f"Current details: Group: {group}, Name: {name}, Phone: {phone}, Email: {email}")
+
+    # Get new details
+    new_phone = input("Enter new phone (10 digits): ")
+    while not (new_phone.isdigit() and len(new_phone) == 10):
+        print("Invalid phone number. Please enter 10 digits: ")
+        new_phone = input("Enter new phone (10 digits): ")
+    
+    new_email = input("Enter new email: ")
+    while '@' not in new_email:
+        print("Invalid email. Please include '@'.")
+        new_email = input("Enter new email: ")
+
+    # Update the contact
+    cursor.execute(""" UPDATE contacts
+                   SET phone = ?, email = ?
+                   WHERE name = ?
+                   """, (new_phone, new_email, name))
+    
+    # Commit changes and close the connection
+    conn.commit()
+    conn.close()
+    print(f"Contact '{name}' updated successfully.")
 
 def main(): 
     while True:
