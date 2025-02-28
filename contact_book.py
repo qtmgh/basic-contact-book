@@ -92,25 +92,52 @@ def import_contacts():
             reader = csv.reader(file)
             next(reader) # Skip header row
             for row in reader:
-                contacts.append({"group": row[0], "name": row[1], "phone": row[2], "email": row[3]})
+                group, name, phone, email = row
+                # Check if group exists
+                if group not in contacts:
+                    contacts[group] = []
+
+                # Check if contact already exists
+                if any(contact["name"] == name and contact["phone"] == phone and contact["email"] == email for contact in contacts[group]):
+                    print(f"Duplicate contact found: {name} ({phone}, {email}) - Skipping.")
+                    continue  # Skip adding duplicate
+
+                
+                contacts[group].append({"group": row[0], "name": row[1], "phone": row[2], "email": row[3]})
         print("Contacts imported from CSV.")
+    
     except FileNotFoundError:
         print("No CSV file found.")
 
 def delete_contact():
+    group = input("Enter the group (Family, Friends, Work): ")
+    if group not in contacts:
+        print("Group not found.")
+        return
+
     name = input("Enter the name of the contact to delete: ")
-    for contact in contacts:
+    
+    for contact in contacts[group]:
         if contact["name"].lower() == name.lower():
-            contacts.remove(contact)
-            print(f"Contact '{name} has been deleted.")
+            contacts[group].remove(contact)
+            print(f"Contact '{name}' has been deleted from {group}.")
             return
+        
+
     print("Contact not found.")
 
 def update_contact():
+    group = input("Enter the group (Family, Friends, Work): ")
+    if group not in contacts:
+        print("Group not found.")
+        return
+
     name = input("Enter the name of the contact to update: ")
-    for contact in contacts:
+
+    for contact in contacts[group]:
         if contact["name"].lower() == name.lower():
             print(f"Current details: Phone: {contact['phone']}, Email: {contact['email']}")
+           
             # Validate phone number
             while True:
                 phone = input("Enter new phone (10 digits): ")
@@ -118,6 +145,7 @@ def update_contact():
                     contact["phone"] = phone
                     break
                 print("Invalid phone number. Please enter 10 digits")
+            
             # Validate email
             while True:
                 email = input("Enter new email: ")
@@ -125,8 +153,10 @@ def update_contact():
                     contact["email"] = email
                     break
                 print("Invalid email. Please include '@'.")
-            print("Contact has been updated.")
+
+            print(f"Contact '{name}' in {group} has been updated.")
             return
+        
     print("Contact not found.")
 
 def main(): 
